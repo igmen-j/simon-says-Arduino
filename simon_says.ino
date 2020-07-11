@@ -14,15 +14,15 @@ void setup() {
     pinMode(led[i], OUTPUT);
     digitalWrite(led[i], LOW);
   }
+  randomSeed(analogRead(0));
 }
 
 void loop() {
-
   startSequence();
-  delay(2000);  //2 second delay
+  //delay(2000);  //2 second delay
   getSequence(currentLevel, sequence);
   showSequence(currentLevel, sequence);
-  
+  /*
   for (int i = 0; i < NUM_COMPONENTS; i++)
   {
     if (digitalRead(button[i]))
@@ -30,6 +30,7 @@ void loop() {
     else
       digitalWrite(led[i], LOW);
   }
+  */
 
 }
 
@@ -39,8 +40,18 @@ void startSequence(){
 }
 
 void getSequence(int currentLevel, int sequence[]) {
-  int randNum = random(0,4);
+  long randNum = random(100);
+  randNum %= 4;
+  Serial.println(randNum);
   sequence[currentLevel] = randNum;  
 }
 
-void showSequence(int);
+void showSequence(int currentLevel, int sequence[]) {
+  digitalWrite(led[sequence[currentLevel]], HIGH);
+  delay(1000); 
+     for (int i = 0; i < NUM_COMPONENTS; i++){
+
+    digitalWrite(led[i], LOW);
+  }
+    delay(1000);
+}
