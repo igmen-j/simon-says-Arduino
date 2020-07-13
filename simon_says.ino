@@ -1,5 +1,5 @@
 #define NUM_COMPONENTS 4
-#define MAX_LEVEL 16
+#define MAX_LEVEL 10
 
 const int button[NUM_COMPONENTS] = {2,3,4,5};
 const int led[NUM_COMPONENTS] = {6,7,8,9};
@@ -13,23 +13,27 @@ void setup() {
     pinMode(led[i], OUTPUT);
     digitalWrite(led[i], LOW);
   }
-  randomSeed(analogRead(0));
 }
 
 void loop() {
-  bool endCondition;
+  bool didPlayerLose;
+  randomSeed(analogRead(0));
   
   startSequence();
   //delay(2000);  //2 second delay
   getSequence();
-  endCondition = startGame();
+  didPlayerLose = startGame();
 
-  if (endCondition == true)
+  Serial.print("Win or Lose: ");
+  Serial.println(didPlayerLose);
+  Serial.println();
+
+  if (didPlayerLose == true)
     loseSequence();
   else
     winSequence();
     
-  delay(100000000);
+  delay(10000);
 }
 
 void startSequence(){
@@ -42,7 +46,7 @@ void startSequence(){
  */
 void getSequence() {
   int randNum;
-  Serial.println("sequence:");
+  //Serial.println("sequence:");
   for (int i = 0; i < MAX_LEVEL; i++) {
     randNum = random(4);
     
@@ -51,51 +55,69 @@ void getSequence() {
     }
      
     sequence[i] = randNum;  
-    Serial.println(sequence[i]);
+    //Serial.println(sequence[i]);
   }
-  Serial.println("done");
+  //Serial.println("done");
   
   return;
 }
 
 bool startGame(){
   int userVal, currentVal = 0, currentLevel = 0, lives = 3;
-  bool isGameOver = false, endCondition;
+  bool isGameOver = false, didPlayerLose;
 
-  while ((isGameOver == false) || (currentLevel == MAX_LEVEL))
+  while ((isGameOver == false) || (currentLevel < MAX_LEVEL))
   {
-    showSequence(currentLevel);
-
     Serial.print("Level: ");
     Serial.println(currentLevel+1);
-    Serial.print("Lives: ");
-    Serial.println(lives);
-  
+
+    currentVal = 0;
+    showSequence(currentLevel);
     while (currentVal != currentLevel+1){
+
+      if (lives == 0){
+        isGameOver = true;
+        didPlayerLose = true;
+        currentLevel = MAX_LEVEL;
+        break;
+      }
+      
+      Serial.print("Lives: ");
+      Serial.println(lives);
+      
       userVal = getUserInput();
       if (compareValue(currentVal, userVal) == true){
         currentVal++;
       }
       else{
         lives--;
-        if (lives != 0)
+        if (lives > 0) {
           currentVal = 0;
+          showSequence(currentLevel);
+          //break;
+        }
         else{
           isGameOver = true;
-          endCondition = true;
+          didPlayerLose = true;
           break;
         }
       }
     }
+
+    delay(500);
     
     if (isGameOver == false){
       currentLevel++;
-      if (currentLevel == endCondition)
-        endCondition == false;
+      if (currentLevel >= MAX_LEVEL) {
+        didPlayerLose = false; //they beat the game!
+        break;
+      }
     }
+    else
+      break;
   }
 
-  return endCondition;
+  return didPlayerLose;
 }
 
 
@@ -109,6 +131,7 @@ void showSequence(int currentLevel) {
     digitalWrite(led[sequence[i]], HIGH);
     delay(1000); 
     digitalWrite(led[sequence[i]], LOW);
+    delay(1000); 
   }
 
   return;
@@ -121,6 +144,10 @@ int getUserInput() {
   while (!buttonPressed){
     for (int i = 0; i < NUM_COMPONENTS; i++) {
       if (digitalRead(button[i])) {
+        while(digitalRead(button[i])){
+          digitalWrite(led[i], HIGH);
+        }
+        digitalWrite(led[i], LOW);
         buttonPressed = true;
         userVal = i;
         break;
@@ -136,13 +163,6 @@ int getUserInput() {
  */
 bool compareValue(int currentVal, int userVal){
   if (sequence[currentVal] == userVal) {
-    for (int i = 0; i < NUM_COMPONENTS; i++){
-      digitalWrite(led[i], HIGH);
-    }
-    delay(1000); 
-    for (int i = 0; i < NUM_COMPONENTS; i++){
-    digitalWrite(led[i], LOW);
-    }
     return true;
   }
   else
@@ -150,9 +170,9 @@ bool compareValue(int currentVal, int userVal){
 }
 
 void loseSequence(){
-  
+  Serial.println("lose");
 }
 
 void winSequence(){
-  
+  Serial.println("win");  
 }
