@@ -4,5 +4,5 @@ I decided to make an Arduino version of the [Simon](https://www.youtube.com/watc
 
 Flow chart:
 
-![Simon Flowchart](https://github.com/igmen-j/simon-says-Arduino/blob/master/Simon%20Says%20Flowchart.png
+![Simon Flowchart](https://github.com/igmen-j/simon-says-Arduino/blob/master/Simon%20Says%20Flowchart.png)
 
