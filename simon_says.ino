@@ -1,14 +1,17 @@
 #define NUM_COMPONENTS 4
 #define MAX_LEVEL 10
+#define TIME_IN_BETWEEN 500
 
 const int button[NUM_COMPONENTS] = {2,3,4,5};
 const int led[NUM_COMPONENTS] = {6,7,8,9};
 const int ledLives[3] = {10,11,12};
+const int buzzer = 13;
 
 int sequence[MAX_LEVEL];
 
 void setup() {
   Serial.begin(9600);
+  pinMode(buzzer, OUTPUT);
   for (int i = 0; i < NUM_COMPONENTS; i++){
     pinMode(button[i], INPUT);
     pinMode(led[i], OUTPUT);   
@@ -19,11 +22,14 @@ void setup() {
     pinMode(ledLives[i], OUTPUT);
     digitalWrite(ledLives[i], LOW);
   }
+  noTone(buzzer);
 }
 
 void loop() {
   bool didPlayerLose;
   randomSeed(analogRead(0));
+
+  noTone(buzzer);
   
   startSequence();
   //delay(2000);  //2 second delay
@@ -119,8 +125,8 @@ bool startGame(){
             digitalWrite(ledLives[2], LOW);
             break;
         }
-            
-        
+
+        delay(1000);
         if (lives > 0) {
           currentVal = 0;
           showSequence(currentLevel);
@@ -150,18 +156,33 @@ bool startGame(){
   return didPlayerLose;
 }
 
-
-
-
 /*
  * Displays the generated sequence
  */
 void showSequence(int currentLevel) {
   for (int i = 0; i < currentLevel+1; i++){
     digitalWrite(led[sequence[i]], HIGH);
-    delay(1000); 
+
+    switch (sequence[i]) {
+    case 0: //red
+      tone(buzzer, 440);
+      break;
+    case 1: //yellow
+      tone(buzzer, 277);
+      break;
+    case 2: //blue
+      tone(buzzer, 330);
+      break;
+    case 3: //green
+      tone(buzzer, 349);
+      break;
+    }
+    delay(TIME_IN_BETWEEN); 
+    
+    noTone(buzzer);
     digitalWrite(led[sequence[i]], LOW);
-    delay(1000); 
+    if (i < currentLevel)
+      delay(TIME_IN_BETWEEN); 
   }
 
   return;
@@ -176,7 +197,22 @@ int getUserInput() {
       if (digitalRead(button[i])) {
         while(digitalRead(button[i])){
           digitalWrite(led[i], HIGH);
+          switch (i) {
+            case 0: //red
+              tone(buzzer, 440);
+              break;
+            case 1: //yellow
+              tone(buzzer, 277);
+              break;
+            case 2: //blue
+              tone(buzzer, 330);
+              break;
+            case 3: //green
+              tone(buzzer, 349);
+              break;
+            }
         }
+        noTone(buzzer);
         digitalWrite(led[i], LOW);
         buttonPressed = true;
         userVal = i;
