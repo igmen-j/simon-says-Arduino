@@ -3,6 +3,7 @@
 
 const int button[NUM_COMPONENTS] = {2,3,4,5};
 const int led[NUM_COMPONENTS] = {6,7,8,9};
+const int ledLives[3] = {10,11,12};
 
 int sequence[MAX_LEVEL];
 
@@ -10,8 +11,13 @@ void setup() {
   Serial.begin(9600);
   for (int i = 0; i < NUM_COMPONENTS; i++){
     pinMode(button[i], INPUT);
-    pinMode(led[i], OUTPUT);
+    pinMode(led[i], OUTPUT);   
     digitalWrite(led[i], LOW);
+  }
+
+  for (int i = 0; i < 3; i++) {
+    pinMode(ledLives[i], OUTPUT);
+    digitalWrite(ledLives[i], LOW);
   }
 }
 
@@ -66,6 +72,10 @@ bool startGame(){
   int userVal, currentVal = 0, currentLevel = 0, lives = 3;
   bool isGameOver = false, didPlayerLose;
 
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(ledLives[i], HIGH);
+  }
+
   while ((isGameOver == false) || (currentLevel < MAX_LEVEL))
   {
     Serial.print("Level: ");
@@ -91,6 +101,26 @@ bool startGame(){
       }
       else{
         lives--;
+
+        switch (lives) {
+          case 2:
+            digitalWrite(ledLives[0], HIGH);
+            digitalWrite(ledLives[1], HIGH);
+            digitalWrite(ledLives[2], LOW);
+            break;
+          case 1:
+            digitalWrite(ledLives[0], HIGH);
+            digitalWrite(ledLives[1], LOW);
+            digitalWrite(ledLives[2], LOW);
+            break;
+          case 0:
+            digitalWrite(ledLives[0], LOW);
+            digitalWrite(ledLives[1], LOW);
+            digitalWrite(ledLives[2], LOW);
+            break;
+        }
+            
+        
         if (lives > 0) {
           currentVal = 0;
           showSequence(currentLevel);
